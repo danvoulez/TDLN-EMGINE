@@ -1,5 +1,5 @@
 {
-  "count": 302,
+  "count": 301,
   "files": [
     {
       "path": "MEGA_PROVENANCE.json",
@@ -1435,11 +1435,6 @@
       "path": "reports/summary.json",
       "size": 228,
       "sha256": "ab200f9ebabd95f99f8bc0c151dc2e99a00567771e5a451467eafa350658e0d2"
-    },
-    {
-      "path": "reports/test_all.20260207T193609Z.log",
-      "size": 3317,
-      "sha256": "9fd6fb3b64a6de9393b273d1631b1b96da5c3c6e4d062d9127f47ae9ed19fca3"
     },
     {
       "path": "template/.env.example",
