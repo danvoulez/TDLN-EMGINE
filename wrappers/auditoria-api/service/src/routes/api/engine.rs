@@ -13,7 +13,7 @@ pub async fn run(State(_st): State<Arc<AppState>>, Json(req): Json<RunReq>) -> J
       "kind": "tdln.card.v1",
       "decision": "ACK",
       "proof": { "seal": {"alg":"ed25519-blake3", "kid":"local", "sig":"DEMO"}},
-      "links": { "card_url": "https://cert.tdln.foundry/r/b3:DEMO" },
-      "input_hash": format!("b3:{:x}", blake3::hash(serde_json::to_string(&req.data).unwrap().as_bytes()))
+      "links": { "card_url": "https://cert.tdln.foundry/r/b3:aaaaaaaaaaaaaaaa" },
+      "input_hash": format!("b3:{}", blake3::hash(serde_json::to_string(&req.data).unwrap().as_bytes()).to_hex())
     }))
 }
