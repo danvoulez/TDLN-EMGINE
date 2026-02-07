@@ -11,7 +11,7 @@ pub struct WasmCertifiedRuntime {
 fn cid_bytes(bytes: &[u8]) -> String {
     let mut h = Hasher::new();
     h.update(bytes);
-    format!("cid:b3:{:x}", h.finalize())
+    format!("cid:b3:{}", h.finalize().to_hex())
 }
 
 fn cid_json(v: &serde_json::Value) -> String {
@@ -28,7 +28,7 @@ impl CertifiedRuntime for WasmCertifiedRuntime {
         cfg_vm.wasm_threads(false);
         let engine = wasmtime::Engine::new(&cfg_vm)?;
         let mut store = wasmtime::Store::new(&engine, ());
-        store.add_fuel(cfg.fuel)?;
+        store.set_fuel(cfg.fuel)?;
 
         // Instantiate module
         let module = wasmtime::Module::new(&engine, unit_bytes)?;
@@ -57,7 +57,7 @@ impl CertifiedRuntime for WasmCertifiedRuntime {
         let proof = ReceiptProof { 
             seal, 
             hash_chain: vec![ChainStep{kind:"input".into(), cid: input_cid.clone()}, ChainStep{kind:"output".into(), cid: output_cid.clone()}], 
-            eer: Some(json!({ "runtime":{"name":"tdln-runtime-wasm","version": self.version, "hash":"b3:demo"}, "config": {"deterministic": true, "fuel": cfg.fuel, "memory_max_mb": cfg.memory_max_mb}, "digests":{"unit_cid": unit_cid, "policy_cid": "cid:b3:policydemo"}, "wasmtime":{"version": wasmtime::version()} }))
+            eer: Some(json!({ "runtime":{"name":"tdln-runtime-wasm","version": self.version, "hash":"b3:demo"}, "config": {"deterministic": true, "fuel": cfg.fuel, "memory_max_mb": cfg.memory_max_mb}, "digests":{"unit_cid": unit_cid, "policy_cid": "cid:b3:policydemo"}, "wasmtime":{"version": "24.0.5"} }))
         };
 
         let card = Card {
@@ -67,14 +67,14 @@ impl CertifiedRuntime for WasmCertifiedRuntime {
             output_cid,
             proof,
             refs: vec![json!({ "kind":"unit.wasm", "cid": unit_cid, "media_type":"application/wasm", "hrefs": ["tdln://objects/<cid>"] })],
-            links: Links { card_url: format!("https://cert.tdln.foundry/r/{}", run_cid.replace("cid:","")) },
+            links: Links { url: String::new(), card_url: format!("https://cert.tdln.foundry/r/{}", run_cid.replace("cid:","")) },
         };
         
     // Sign the card (DEMO key – replace in production)
     let mut card = card;
     let sk_b64 = std::env::var("TDLN_DEMO_SK_B64").unwrap_or_default();
     if !sk_b64.is_empty() {
-        let bytes = tdln_certified_runtime::serde_json::to_vec(&card).unwrap();
+        let bytes = serde_json::to_vec(&card).unwrap();
         // Reuse tdln-verify approach would be ideal; keeping simple here for demo
         card.proof.seal.kid = "demo".into();
         card.proof.seal.sig = base64::encode(blake3::hash(&bytes).as_bytes());
